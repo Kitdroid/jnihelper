@@ -1,0 +1,54 @@
+<idea-plugin version="2">
+    <id>org.kitdroid.jnihelper</id>
+    <name>Jni Helper</name>
+    <version>1.0</version>
+    <vendor email="huiyh@live.com" url="http://www.kitdroid.org">YourCompany</vendor>
+
+    <description><![CDATA[
+      Enter short description for your plugin here.<br>
+      <em>most HTML tags may be used</em>
+    ]]></description>
+
+    <change-notes><![CDATA[
+      Add change notes here.<br>
+      <em>most HTML tags may be used</em>
+    ]]>
+    </change-notes>
+
+    <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
+    <idea-version since-build="131"/>
+
+    <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
+         on how to target different products -->
+    <!-- uncomment to enable plugin in all products
+    <depends>com.intellij.modules.lang</depends>
+    -->
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Add your extensions here -->
+    </extensions>
+
+    <application-components>
+        <!-- Add your application components here -->
+    </application-components>
+
+    <project-components>
+        <!-- Add your project components here -->
+    </project-components>
+
+    <actions>
+        <!-- Add your actions here -->
+        <action
+                id="org.kitdroid.javah"
+                class="org.kitdroid.plugin.javah.JavahAction"
+                text="Generate  *.h by javah"
+                description="Generate  *.h by javah for native method in selected java class file.">
+            <add-to-group group-id="ProjectViewPopupMenu"
+                          anchor="after"
+                          relative-to-action="FindBugs.ProjectViewPopupMenu"/>
+            <add-to-group group-id="GenerateGroup"/>
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+        </action>
+    </actions>
+
+</idea-plugin>

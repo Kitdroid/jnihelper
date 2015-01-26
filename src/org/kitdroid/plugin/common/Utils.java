@@ -109,13 +109,12 @@ public class Utils {
     public static final String getShellOut(Process p) throws IOException{
 
         StringBuilder sb = new StringBuilder();
-        BufferedInputStream in = null;
+//        BufferedInputStream in = null;
         BufferedReader br = null;
 
         try {
-
-            in = new BufferedInputStream(p.getErrorStream());
-            br = new BufferedReader(new InputStreamReader(in));
+//            in = new BufferedInputStream(p.getErrorStream());
+            br = new BufferedReader(new InputStreamReader(p.getErrorStream()));
             String s;
 
             while ((s = br.readLine()) != null) {
@@ -126,8 +125,10 @@ public class Utils {
         } catch (IOException e) {
             throw e;
         } finally {
-            br.close();
-            in.close();
+            if(br != null){
+                br.close();
+            }
+//            in.close();
         }
 
         return sb.toString();

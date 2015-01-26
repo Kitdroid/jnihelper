@@ -44,10 +44,10 @@
                 text="Generate  *.h by javah"
                 description="Generate  *.h by javah for native method in selected java class file.">
             <add-to-group group-id="ProjectViewPopupMenu"
-                          anchor="after"
-                          relative-to-action="FindBugs.ProjectViewPopupMenu"/>
-            <add-to-group group-id="GenerateGroup"/>
-            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+                          anchor="last"/>
+            <add-to-group group-id="EditorPopupMenu"
+                          relative-to-action="GenerateGroup"
+                          anchor="after"/>
         </action>
     </actions>
 

@@ -2,39 +2,29 @@ package org.kitdroid.plugin.javah;
 
 import com.intellij.codeInsight.CodeInsightActionHandler;
 import com.intellij.codeInsight.generation.actions.BaseGenerateAction;
-import com.intellij.openapi.actionSystem.AnAction;
 import com.intellij.openapi.actionSystem.AnActionEvent;
 import com.intellij.openapi.actionSystem.PlatformDataKeys;
 import com.intellij.openapi.editor.Editor;
-import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.roots.ProjectFileIndex;
 import com.intellij.openapi.roots.ProjectRootManager;
 import com.intellij.openapi.ui.Messages;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.*;
-import com.intellij.psi.search.EverythingGlobalScope;
-import com.intellij.psi.search.FilenameIndex;
-import com.intellij.psi.util.PsiUtil;
 import com.intellij.psi.util.PsiUtilBase;
 import org.kitdroid.plugin.common.Log;
 import org.kitdroid.plugin.common.Utils;
 import org.kitdroid.plugin.gui.ModuleList;
 import org.kitdroid.plugin.gui.i.OnSelectedListener;
-import sun.jvm.hotspot.memory.PlaceholderTable;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.io.IOException;
 import java.util.List;
 
 /**
  * Created by huiyh on 15/1/21.
  */
-public class JavahAction extends BaseGenerateAction implements OnSelectedListener {
-
-    private JFrame mDialog;
+public class JavahAction extends BaseGenerateAction {
 
     public JavahAction() {
         super(null);
@@ -45,12 +35,14 @@ public class JavahAction extends BaseGenerateAction implements OnSelectedListene
 
     @Override
     protected boolean isValidForClass(final PsiClass targetClass) {
+        //只对java类有效
         return ( super.isValidForClass(targetClass) && !(targetClass instanceof PsiAnonymousClass));
 //        return true;
     }
 
     @Override
     public boolean isValidForFile(Project project, Editor editor, PsiFile file) {
+        //只对java类有效
         return (super.isValidForFile(project, editor, file));
 //        return true;
     }
@@ -67,95 +59,75 @@ public class JavahAction extends BaseGenerateAction implements OnSelectedListene
     public void actionPerformedImpl(Project project, Editor editor) {
         PsiFile file = PsiUtilBase.getPsiFileInEditor(editor, project);
         PsiClass sourceClass = getTargetClass(editor, file);
-        String sourceClassName = sourceClass.getName(); // 不含包名
-        String qualifiedName = sourceClass.getQualifiedName(); // 包含包名
+
         boolean hasNativeMethod = Utils.hasNativeMethod(sourceClass);
         if(!hasNativeMethod){
             Utils.showErrorNotification(project,"This file has no native method.");
             return;
         }
-//        execJavah(project,file);
 
-        Utils.showInfoNotification(project,"Generate *.h for " + file.getName());
         ProjectRootManager rootManager = ProjectRootManager.getInstance(project);
-        ProjectFileIndex projectFileIndex = rootManager.getFileIndex();
-        VirtualFile[] contentRoots = rootManager.getContentRoots();
-        VirtualFile[] contentRootsFromAllModules = rootManager.getContentRootsFromAllModules();
         final ProjectFileIndex fileIndex = rootManager.getFileIndex();
-        VirtualFile sourceRootForFile = fileIndex.getSourceRootForFile(file.getVirtualFile()); // 默认包的路径 /XXX/src/main/java
-        ArrayList<String> moduleNames = new ArrayList<String>();
-        for(VirtualFile file1 : contentRoots){
-            Module module = fileIndex.getModuleForFile(file1);
+        VirtualFile sourceRootFile = fileIndex.getSourceRootForFile(file.getVirtualFile()); // 默认包的路径 /XXX/src/main/java
 
-            moduleNames.add(module.getName());
-        }
-        if(moduleNames == null || moduleNames.isEmpty()){
-            // TODO 在本Module中创建
-        }else {
-            // 选择Module
-            showDialog(project,editor,moduleNames);
-        }
-
-        Log.i("sourceClass: "+sourceClass.getName());
+        createJavahFile(project, sourceRootFile, sourceClass);
     }
 
-        // TODO exec javah
-    private void execJavah(Project project,PsiClass sourceClass,PsiFile sourceFile,String moduleName) {
-        String targetPath = moduleName;
-        String sourcePath =  PsiUtilBase.getVirtualFile(sourceFile.getNavigationElement()).getPath();
+    private void createJavahFile(Project project, VirtualFile sourceRootFile, PsiClass sourceClass) {
+        Utils.showInfoNotification(project,"Generate *.h for " + sourceClass.getName());
+
+        VirtualFile sourceParentFile = sourceRootFile.getParent();
+        VirtualFile sourceJniFile = findOrCreateJinDir(project, sourceParentFile);
+
+        if(sourceJniFile == null){
+            return;
+        }
+        String targetPath = sourceJniFile.getPath();
+        String sourcePath = sourceRootFile.getPath();
+        String sourceClassName = sourceClass.getQualifiedName(); // 包含包名
+
+        execJavah(targetPath, sourcePath, sourceClassName);
+    }
+
+    private VirtualFile findOrCreateJinDir(Project project, VirtualFile sourceParentFile) {
+        VirtualFile jniDir = sourceParentFile.findChild("jni");
+        if(jniDir == null || !jniDir.exists()){
+            try {
+                jniDir = sourceParentFile.createChildDirectory(project, "jni");
+            } catch (IOException e) {
+                jniDir = null;
+//                Utils.showErrorNotification(project, "Creat \"jin\" directory fail !");
+                Messages.showErrorDialog("Create \"jin\" directory fail !\nYou can create it manually.","Error");
+                e.printStackTrace();
+            }
+        }else if(!jniDir.isDirectory()){
+            Messages.showErrorDialog("Create \"jin\" directory fail !\n Required a directory,but is a file.","Error");
+            jniDir = null;
+        }
+        return jniDir;
+    }
 
 
-        sourceClass.getName();
-//        String sourceClassName = sourceFile.
-
+    private void execJavah(String targetPath, String sourcePath, String sourceClassName) {
         StringBuilder builder = new StringBuilder("javah -d ");
-        builder.append(moduleName);
+        builder.append(targetPath);
         builder.append(" -classpath ");
-        builder.append(sourceFile);
+        builder.append(sourcePath);
+        builder.append(" ");
+        builder.append(sourceClassName);
 
+        Utils.execute(builder.toString(), null);
+    }
+    private void execJavah2(String targetPath, String sourcePath, String sourceClassName) {
         String[] envp = new String[5];
 
         envp[0] = "-d";
         envp[1] = targetPath;
         envp[2] = "-classpath";
         envp[3] = sourcePath;
+        envp[4] = sourceClassName;
 
-        Utils.execute(builder.toString(),null);
-
+        Utils.execute("javah",envp);
     }
 
-    private void testPath(Project project, PsiFile sourceFile) {
-        Log.i("execJavah");
-
-        Log.i(project.getBasePath());//项目路径 /Users/huiyh/AndroidProjects/jniDemo
-
-        Log.i(sourceFile.getName());// 文件名 MainActivity.java
-        VirtualFile virtualFile = PsiUtilBase.getVirtualFile(sourceFile.getNavigationElement());
-        String path = virtualFile.getPath();
-        Log.i(path); // 文件路径 /Users/huiyh/AndroidProjects/jniDemo/app/src/main/java/com/huiyh/jnidemo/MainActivity.java
-
-        Log.i(project.getProjectFilePath());
-        Log.i(project.getWorkspaceFile().getPath());
-
-        String[] moduleNames = Utils.getModuleNamesByGradleSettings(project);
-    }
-
-
-    protected void showDialog(Project project, Editor editor, List<String> moduleNames) {
-
-        mDialog = new JFrame();
-        mDialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-
-        ModuleList panel = new ModuleList(project,moduleNames, this);
-        mDialog.getContentPane().add(panel);
-        mDialog.pack();
-        mDialog.setLocationRelativeTo(null);
-        mDialog.setVisible(true);
-    }
-
-    @Override
-    public void onSelected(Project project,JComponent view, String tag) {
-        mDialog.setVisible(false);
-//        execJavah(project,);
-    }
 }

@@ -12,7 +12,7 @@
         <html>
           <b>1.0</b> (1/20/2015)
           <ul>
-            <li>Create the *.h file in the same module at the "jni" directory.</li>
+            <li>Create *.h file in same module at the "jni" directory.</li>
           </ul>
           <b>1.1</b> (developing)
           <ul>

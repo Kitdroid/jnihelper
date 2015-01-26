@@ -5,13 +5,20 @@
     <vendor email="huiyh@live.com" url="http://www.kitdroid.org">YourCompany</vendor>
 
     <description><![CDATA[
-      Enter short description for your plugin here.<br>
-      <em>most HTML tags may be used</em>
+      Jni Helper for Android Studio or Intellij IDEA
     ]]></description>
 
     <change-notes><![CDATA[
-      Add change notes here.<br>
-      <em>most HTML tags may be used</em>
+        <html>
+          <b>1.0</b> (1/20/2015)
+          <ul>
+            <li>Create the *.h file in the same module at the "jni" directory.</li>
+          </ul>
+          <b>1.1</b> (developing)
+          <ul>
+            <li>Will be multi module support.</li>
+          </ul>
+        </html>
     ]]>
     </change-notes>
 

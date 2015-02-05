@@ -19,6 +19,7 @@
             <li>Compile with JDK1.6.0 to repair bug:
                 <br/>Null child action in group Editor Popup Menu (Editor Popup Menu) of class class com.intellij.openapi.actionSystem.DefaultActionGroup
             </li>
+            <li>Add icon with logo of NDK</li>
           </ul>
           <b>1.1</b> (developing)
           <ul>
@@ -55,6 +56,7 @@
                 id="org.kitdroid.javah"
                 class="org.kitdroid.plugin.javah.JavahAction"
                 text="Generate  *.h by javah"
+                icon="/org/kitdroid/plugin/icons/ndk13.png"
                 description="Generate  *.h by javah for native method in selected java class file.">
             <add-to-group group-id="ProjectViewPopupMenu"/>
             <add-to-group group-id="EditorPopupMenu"/>

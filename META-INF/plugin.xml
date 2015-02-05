@@ -1,8 +1,8 @@
 <idea-plugin version="2">
     <id>org.kitdroid.jnihelper</id>
     <name>Jni Helper</name>
-    <version>1.0</version>
-    <vendor email="huiyh@live.com" url="http://www.kitdroid.org">YourCompany</vendor>
+    <version>1.0.1</version>
+    <vendor email="huiyh@live.com" url="http://www.kitdroid.org">Kitdroid.org</vendor>
 
     <description><![CDATA[
       Jni Helper for Android Studio or Intellij IDEA
@@ -14,6 +14,12 @@
           <ul>
             <li>Create *.h file in same module at the "jni" directory.</li>
           </ul>
+          <b>1.0.1</b> (2/5/2015)
+          <ul>
+            <li>Compile with JDK1.6.0 to repair bug:
+                <br/>Null child action in group Editor Popup Menu (Editor Popup Menu) of class class com.intellij.openapi.actionSystem.DefaultActionGroup
+            </li>
+          </ul>
           <b>1.1</b> (developing)
           <ul>
             <li>Will be multi module support.</li>
@@ -23,7 +29,7 @@
     </change-notes>
 
     <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Build+Number+Ranges for description -->
-    <idea-version since-build="131"/>
+    <idea-version since-build="135"/>
 
     <!-- please see http://confluence.jetbrains.com/display/IDEADEV/Plugin+Compatibility+with+IntelliJ+Platform+Products
          on how to target different products -->
@@ -50,11 +56,8 @@
                 class="org.kitdroid.plugin.javah.JavahAction"
                 text="Generate  *.h by javah"
                 description="Generate  *.h by javah for native method in selected java class file.">
-            <add-to-group group-id="ProjectViewPopupMenu"
-                          anchor="last"/>
-            <add-to-group group-id="EditorPopupMenu"
-                          relative-to-action="GenerateGroup"
-                          anchor="after"/>
+            <add-to-group group-id="ProjectViewPopupMenu"/>
+            <add-to-group group-id="EditorPopupMenu"/>
         </action>
     </actions>
 
